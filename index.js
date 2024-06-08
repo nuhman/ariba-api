@@ -13,7 +13,7 @@ app.get("/about", (req, res) => {
 });
 
 // Contact route
-app.get("/contact", (req, res) => {
+app.post("/contact", (req, res) => {
   console.log("Hit", req.body);
   res.send("Contact us at info@example.com");
 });
