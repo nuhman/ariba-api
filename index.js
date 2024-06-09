@@ -2,6 +2,9 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+// Configure the express-xml-bodyparser middleware
+app.use(xmlparser());
+
 // Home route
 app.get("/", (req, res) => {
   res.send("Welcome to the home page!");
@@ -14,7 +17,11 @@ app.get("/about", (req, res) => {
 
 // Contact route
 app.post("/contact", (req, res) => {
-  console.log("Hit", req.body);
+  console.log("Hit");
+  // Access the parsed XML data from req.body
+  const cxml = req.body;
+  // Process the cXML data
+  console.log('Received cXML:', cxml);
   res.send("Contact us at info@example.com");
 });
 
