@@ -22,7 +22,7 @@ app.post("/contact", (req, res) => {
   // Access the parsed XML data from req.body
   const cxml = req.body;
   // Process the cXML data
-  console.log('Received cXML:', cxml);
+  console.log('Received cXML:', JSON.stringify(cxml, null, 2));
   res.send("Contact us at info@example.com");
 });
 
