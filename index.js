@@ -16,14 +16,43 @@ app.get("/about", (req, res) => {
   res.send("This is the about page.");
 });
 
+// Helper function to generate a unique payload ID
+function generatePayloadID() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
+// Helper function to get the current timestamp
+function getCurrentTimestamp() {
+  return new Date().toISOString();
+}
+
 // Contact route
-app.post("/contact", (req, res) => {
+app.post("/punchout", (req, res) => {
   console.log("Hit");
   // Access the parsed XML data from req.body
   const cxml = req.body;
   // Process the cXML data
   console.log('Received cXML:', JSON.stringify(cxml, null, 2));
-  res.send("Contact us at info@example.com");
+
+  const response = `<?xml version="1.0" encoding="UTF-8"?>
+    <cXML payloadID="${generatePayloadID()}" timestamp="${getCurrentTimestamp()}">
+      <Response>
+        <Status code="200" text="OK" />
+        <PunchOutSetupResponse>
+          <StartPage>
+            <URL>https://ariba-api.onrender.com</URL>
+          </StartPage>
+        </PunchOutSetupResponse>
+      </Response>
+    </cXML>`;
+
+  // Set the response headers
+  res.set('Content-Type', 'application/xml');
+
+  // Send the response
+  res.send(response);
+
+  //res.send("Contact us at info@example.com");
 });
 
 // Start the server
