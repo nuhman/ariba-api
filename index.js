@@ -1,5 +1,5 @@
 const express = require("express");
-const xmlparser = require('express-xml-bodyparser');
+const xmlparser = require("express-xml-bodyparser");
 const app = express();
 const port = 3000;
 
@@ -8,7 +8,7 @@ app.use(xmlparser());
 
 // Home route
 app.get("/", (req, res) => {
-  res.send("Welcome to the home page!");
+  res.send("Welcome to Global Intl Online Shopping Site");
 });
 
 // About route
@@ -32,7 +32,7 @@ app.post("/punchout", (req, res) => {
   // Access the parsed XML data from req.body
   const cxml = req.body;
   // Process the cXML data
-  console.log('Received cXML:', JSON.stringify(cxml, null, 2));
+  console.log("Received cXML:", JSON.stringify(cxml, null, 2));
 
   const response = `<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE cXML SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd">
@@ -48,7 +48,7 @@ app.post("/punchout", (req, res) => {
     </cXML>`;
 
   // Set the response headers
-  res.set('Content-Type', 'application/xml');
+  res.set("Content-Type", "application/xml");
 
   // Send the response
   res.send(response);
