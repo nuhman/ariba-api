@@ -34,7 +34,6 @@
 <% } %>
 
 <a href="/">Continue Shopping</a>
-
 <form
   id="cxml_form"
   method="POST"
@@ -63,6 +62,8 @@
           document.getElementById("cxml_form").elements[
             "cXML-urlencoded"
           ].value = data.cxml;
+
+          console.log("data form cxml: ", data.cxml);
 
           // Submit the form
           document.getElementById("cxml_form").submit();

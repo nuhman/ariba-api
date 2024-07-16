@@ -203,7 +203,103 @@ app.post("/checkout", async (req, res) => {
   }
 });
 
-// Generate POOM route
+function escapeXml(unsafe) {
+  return unsafe.replace(/[&'<>]/g, function (c) {
+    switch (c) {
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      default:
+        return c;
+    }
+  });
+}
+
+function escapeHtml(unsafe) {
+  return unsafe.replace(/[&"']/g, function (c) {
+    switch (c) {
+      case "&":
+        return "&amp;";
+      case '"':
+        return "&quot;";
+      case "'":
+        return "&apos;";
+      default:
+        return c;
+    }
+  });
+}
+function generatePOOMcXML(cart) {
+  let itemsXml = cart
+    .map(
+      (item) => `
+    <ItemIn quantity='${escapeXml(item.quantity.toString())}'>
+      <ItemID>
+        <SupplierPartID>${escapeXml(item.id.toString())}</SupplierPartID>
+      </ItemID>
+      <ItemDetail>
+        <UnitPrice>
+          <Money currency='USD'>${escapeXml(item.price.toFixed(2))}</Money>
+        </UnitPrice>
+        <Description xml:lang='en'>${escapeXml(item.name)}</Description>
+        <UnitOfMeasure>EA</UnitOfMeasure>
+      </ItemDetail>
+    </ItemIn>
+  `
+    )
+    .join("");
+
+  const total = cart
+    .reduce((total, item) => total + item.price * item.quantity, 0)
+    .toFixed(2);
+
+  const cxml = `<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE cXML SYSTEM 'http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd'>
+<cXML xml:lang='en-US' payloadID='${escapeXml(
+    generatePayloadID()
+  )}' timestamp='${escapeXml(getCurrentTimestamp())}'>
+  <Header>
+    <From>
+      <Credential domain='NetworkID'>
+        <Identity>AN01000002779-T</Identity>
+      </Credential>
+    </From>
+    <To>
+      <Credential domain='NetworkID'>
+        <Identity>AN11032106721-T</Identity>
+      </Credential>
+    </To>
+    <Sender>
+      <Credential domain='AribaNetworkUserId'>
+        <Identity>sysadmin@ariba.com</Identity>
+        <SharedSecret>p9LJ&lt;109c$</SharedSecret>
+      </Credential>
+      <UserAgent>CatalogTester</UserAgent>
+    </Sender>
+  </Header>
+  <Message>
+    <PunchOutOrderMessage>
+      <BuyerCookie>${escapeXml(buyerCookie)}</BuyerCookie>
+      <PunchOutOrderMessageHeader operationAllowed='create'>
+        <Total>
+          <Money currency='USD'>${escapeXml(total)}</Money>
+        </Total>
+      </PunchOutOrderMessageHeader>
+      ${itemsXml}
+    </PunchOutOrderMessage>
+  </Message>
+</cXML>`;
+
+  // Remove all newlines and excess whitespace
+  return cxml.replace(/\s+/g, " ").trim();
+}
+
+// In the generate-poom route
 app.post("/generate-poom", (req, res) => {
   if (!buyerCookie || !poomUrl) {
     return res.status(400).json({
@@ -215,71 +311,15 @@ app.post("/generate-poom", (req, res) => {
   // Generate cXML for cart items
   const cxml = generatePOOMcXML(cart);
 
+  // Encode the cXML properly for HTML form
+  const encodedCxml = escapeHtml(cxml);
+
   res.json({
     success: true,
-    cxml: encodeURIComponent(cxml), // URL encode the cXML
+    cxml: encodedCxml,
     buyer_form_post_url: poomUrl,
   });
 });
-
-function generatePOOMcXML(cart) {
-  let itemsXml = cart
-    .map(
-      (item) => `
-    <ItemIn quantity="${item.quantity}">
-      <ItemID>
-        <SupplierPartID>${supplierPartId}</SupplierPartID>
-      </ItemID>
-      <ItemDetail>
-        <UnitPrice>
-          <Money currency="KWD">${item.price.toFixed(2)}</Money>
-        </UnitPrice>
-        <Description xml:lang="en">${item.name}</Description>
-        <UnitOfMeasure>EA</UnitOfMeasure>
-      </ItemDetail>
-    </ItemIn>
-  `
-    )
-    .join("");
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE cXML SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd">
-<cXML xml:lang="en-US" payloadID="${generatePayloadID()}" timestamp="${getCurrentTimestamp()}">
-  <Header>
-    <From>
-      <Credential domain="NetworkID">
-        <Identity>AN01000002779-T</Identity>
-      </Credential>
-    </From>
-    <To>
-      <Credential domain="NetworkID">
-        <Identity>AN11032106721-T</Identity>
-      </Credential>
-    </To>
-    <Sender>
-      <Credential domain="AribaNetworkUserId">
-        <Identity>sysadmin@ariba.com</Identity>
-        <SharedSecret>p9LJ&lt;109c$</SharedSecret>
-      </Credential>
-      <UserAgent>CatalogTester</UserAgent>
-    </Sender>
-  </Header>
-  <Message>
-    <PunchOutOrderMessage>
-      <BuyerCookie>${buyerCookie}</BuyerCookie>
-      <PunchOutOrderMessageHeader operationAllowed="create">
-        <Total>
-          <Money currency="KWD">${cart
-            .reduce((total, item) => total + item.price * item.quantity, 0)
-            .toFixed(2)}</Money>
-        </Total>
-      </PunchOutOrderMessageHeader>
-      ${itemsXml}
-    </PunchOutOrderMessage>
-  </Message>
-</cXML>`;
-}
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
