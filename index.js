@@ -204,16 +204,18 @@ app.post("/checkout", async (req, res) => {
 });
 
 function escapeXml(unsafe) {
-  return unsafe.replace(/[&'<>]/g, function (c) {
+  return unsafe.replace(/[&<>'"]/g, function (c) {
     switch (c) {
       case "&":
         return "&amp;";
-      case "'":
-        return "&apos;";
       case "<":
         return "&lt;";
       case ">":
         return "&gt;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
       default:
         return c;
     }
@@ -234,19 +236,20 @@ function escapeHtml(unsafe) {
     }
   });
 }
+
 function generatePOOMcXML(cart) {
   let itemsXml = cart
     .map(
       (item) => `
-    <ItemIn quantity='${escapeXml(item.quantity.toString())}'>
+    <ItemIn quantity="${escapeXml(item.quantity.toString())}">
       <ItemID>
         <SupplierPartID>${escapeXml(item.id.toString())}</SupplierPartID>
       </ItemID>
       <ItemDetail>
         <UnitPrice>
-          <Money currency='USD'>${escapeXml(item.price.toFixed(2))}</Money>
+          <Money currency="USD">${escapeXml(item.price.toFixed(2))}</Money>
         </UnitPrice>
-        <Description xml:lang='en'>${escapeXml(item.name)}</Description>
+        <Description xml:lang="en">${escapeXml(item.name)}</Description>
         <UnitOfMeasure>EA</UnitOfMeasure>
       </ItemDetail>
     </ItemIn>
@@ -258,24 +261,24 @@ function generatePOOMcXML(cart) {
     .reduce((total, item) => total + item.price * item.quantity, 0)
     .toFixed(2);
 
-  const cxml = `<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE cXML SYSTEM 'http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd'>
-<cXML xml:lang='en-US' payloadID='${escapeXml(
+  const cxml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cXML SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd">
+<cXML xml:lang="en-US" payloadID="${escapeXml(
     generatePayloadID()
-  )}' timestamp='${escapeXml(getCurrentTimestamp())}'>
+  )}" timestamp="${escapeXml(getCurrentTimestamp())}">
   <Header>
     <From>
-      <Credential domain='NetworkID'>
+      <Credential domain="NetworkID">
         <Identity>AN01000002779-T</Identity>
       </Credential>
     </From>
     <To>
-      <Credential domain='NetworkID'>
+      <Credential domain="NetworkID">
         <Identity>AN11032106721-T</Identity>
       </Credential>
     </To>
     <Sender>
-      <Credential domain='AribaNetworkUserId'>
+      <Credential domain="AribaNetworkUserId">
         <Identity>sysadmin@ariba.com</Identity>
         <SharedSecret>p9LJ&lt;109c$</SharedSecret>
       </Credential>
@@ -285,9 +288,9 @@ function generatePOOMcXML(cart) {
   <Message>
     <PunchOutOrderMessage>
       <BuyerCookie>${escapeXml(buyerCookie)}</BuyerCookie>
-      <PunchOutOrderMessageHeader operationAllowed='create'>
+      <PunchOutOrderMessageHeader operationAllowed="create">
         <Total>
-          <Money currency='USD'>${escapeXml(total)}</Money>
+          <Money currency="USD">${escapeXml(total)}</Money>
         </Total>
       </PunchOutOrderMessageHeader>
       ${itemsXml}
@@ -299,20 +302,21 @@ function generatePOOMcXML(cart) {
   return cxml.replace(/\s+/g, " ").trim();
 }
 
-// In the generate-poom route
 app.post("/generate-poom", (req, res) => {
   if (!buyerCookie || !poomUrl) {
-    return res.status(400).json({
-      success: false,
-      message: "Buyer cookie or POOM URL not available",
-    });
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Buyer cookie or POOM URL not available",
+      });
   }
 
   // Generate cXML for cart items
   const cxml = generatePOOMcXML(cart);
 
-  // Encode the cXML properly for HTML form
-  const encodedCxml = escapeHtml(cxml);
+  // URL-encode the cXML
+  const encodedCxml = encodeURIComponent(cxml);
 
   res.json({
     success: true,
@@ -320,6 +324,7 @@ app.post("/generate-poom", (req, res) => {
     buyer_form_post_url: poomUrl,
   });
 });
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
