@@ -179,7 +179,7 @@ app.post("/checkout", async (req, res) => {
       },
     });
 
-    console.log("response: ", response.body);
+    console.log("response: ", response);
 
     // Check the response from the POOM URL
     if (response.status === 200) {
