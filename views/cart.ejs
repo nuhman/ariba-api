@@ -34,35 +34,47 @@
 <% } %>
 
 <a href="/">Continue Shopping</a>
-<form id="cxml_form" method="POST" action="" enctype="application/x-www-form-urlencoded" style="display:none;">
-  <input type="hidden" name="cXML-urlencoded" value="">
+<form
+  id="cxml_form"
+  method="POST"
+  action=""
+  enctype="application/x-www-form-urlencoded"
+  style="display: none"
+>
+  <input type="hidden" name="cXML-urlencoded" value="" />
 </form>
 
 <script>
-function returnToAriba() {
-  fetch('/generate-poom', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({}),
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Set the form action and input value
-      document.getElementById('cxml_form').action = data.buyer_form_post_url;
-      document.getElementById('cxml_form').elements['cXML-urlencoded'].value = data.cxml;
-      
-      // Submit the form
-      document.getElementById('cxml_form').submit();
-    } else {
-      alert('Failed to generate order: ' + data.message);
-    }
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-    alert('An error occurred while processing the order.');
-  });
-}
+  function returnToAriba() {
+    fetch("/generate-poom", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("data: ", data);
+        if (data.success) {
+          // Set the form action and input value
+          document.getElementById("cxml_form").action =
+            data.buyer_form_post_url;
+          document.getElementById("cxml_form").elements[
+            "cXML-urlencoded"
+          ].value = data.cxml;
+
+          console.log("form xml: ", data.cxml);
+
+          // Submit the form
+          document.getElementById("cxml_form").submit();
+        } else {
+          alert("Failed to generate order: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while processing the order.");
+      });
+  }
 </script>
