@@ -47,10 +47,8 @@
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          console.log("POOM URL:", data.poomUrl);
-          console.log("cXML:", data.cxml);
-          // In a real application, you would submit the cXML to the POOM URL
-          alert("Checkout successful! Check console for POOM URL and cXML.");
+          alert("Checkout successful!");
+          window.location.href = "/"; // Redirect to home page or a confirmation page
         } else {
           alert("Checkout failed: " + data.message);
         }

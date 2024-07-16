@@ -3,6 +3,7 @@ const xmlparser = require("express-xml-bodyparser");
 const expressLayouts = require("express-ejs-layouts");
 const path = require("path");
 const app = express();
+const axios = require("axios");
 const port = 3000;
 
 // Configure the express-xml-bodyparser middleware
@@ -119,7 +120,8 @@ app.post("/punchout", (req, res) => {
     req.body.cxml.request[0].punchoutsetuprequest &&
     req.body.cxml.request[0].punchoutsetuprequest[0]
   ) {
-    const punchoutSetupRequest = req.body.cxml.request[0].punchoutsetuprequest[0];
+    const punchoutSetupRequest =
+      req.body.cxml.request[0].punchoutsetuprequest[0];
 
     if (
       punchoutSetupRequest.browserformpost &&
@@ -159,7 +161,7 @@ app.post("/punchout", (req, res) => {
   //res.send("Contact us at info@example.com");
 });
 
-app.post("/checkout", (req, res) => {
+app.post("/checkout", async (req, res) => {
   if (!poomUrl) {
     return res
       .status(400)
@@ -169,9 +171,30 @@ app.post("/checkout", (req, res) => {
   // Generate cXML for cart items
   const cxml = generatePOOMcXML(cart);
 
-  // In a real application, you would send this cXML to the poomUrl
-  // For now, we'll just send it back to the client
-  res.json({ success: true, poomUrl, cxml });
+  try {
+    // Send the cXML to the POOM URL
+    const response = await axios.post(poomUrl, cxml, {
+      headers: {
+        "Content-Type": "text/xml",
+      },
+    });
+
+    // Check the response from the POOM URL
+    if (response.status === 200) {
+      // Clear the cart after successful checkout
+      cart = [];
+      res.json({ success: true, message: "Checkout successful" });
+    } else {
+      res
+        .status(response.status)
+        .json({ success: false, message: "Checkout failed" });
+    }
+  } catch (error) {
+    console.error("Error during checkout:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "An error occurred during checkout" });
+  }
 });
 
 function generatePOOMcXML(cart) {
