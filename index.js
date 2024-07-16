@@ -113,12 +113,13 @@ app.post("/punchout", (req, res) => {
   // Extract and store the POOM URL and buyer cookie
   if (
     req.body &&
-    req.body.request &&
-    req.body.request[0] &&
-    req.body.request[0].punchoutsetuprequest &&
-    req.body.request[0].punchoutsetuprequest[0]
+    req.body.cxml &&
+    req.body.cxml.request &&
+    req.body.cxml.request[0] &&
+    req.body.cxml.request[0].punchoutsetuprequest &&
+    req.body.cxml.request[0].punchoutsetuprequest[0]
   ) {
-    const punchoutSetupRequest = req.body.request[0].punchoutsetuprequest[0];
+    const punchoutSetupRequest = req.body.cxml.request[0].punchoutsetuprequest[0];
 
     if (
       punchoutSetupRequest.browserformpost &&
