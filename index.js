@@ -179,6 +179,8 @@ app.post("/checkout", async (req, res) => {
       },
     });
 
+    console.log("response: ", response.body);
+
     // Check the response from the POOM URL
     if (response.status === 200) {
       // Clear the cart after successful checkout
