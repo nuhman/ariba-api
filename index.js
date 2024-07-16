@@ -172,8 +172,7 @@ app.post("/checkout", async (req, res) => {
   const cxml = generatePOOMcXML(cart);
 
   try {
-
-    console.log("cxml....")
+    console.log("cxml....");
     console.log(cxml);
     // Send the cXML to the POOM URL
     const response = await axios.post(poomUrl, cxml, {
@@ -194,13 +193,31 @@ app.post("/checkout", async (req, res) => {
         .status(response.status)
         .json({ success: false, message: "Checkout failed" });
     }
-
   } catch (error) {
     console.error("Error during checkout:", error);
     res
       .status(500)
       .json({ success: false, message: "An error occurred during checkout" });
   }
+});
+
+// Generate POOM route
+app.post("/generate-poom", (req, res) => {
+  if (!buyerCookie || !poomUrl) {
+    return res.status(400).json({
+      success: false,
+      message: "Buyer cookie or POOM URL not available",
+    });
+  }
+
+  // Generate cXML for cart items
+  const cxml = generatePOOMcXML(cart);
+
+  res.json({
+    success: true,
+    cxml: encodeURIComponent(cxml), // URL encode the cXML
+    buyer_form_post_url: poomUrl,
+  });
 });
 
 function generatePOOMcXML(cart) {
