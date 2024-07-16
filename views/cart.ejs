@@ -1,0 +1,63 @@
+<h2>Your Shopping Cart</h2>
+
+<% if (cart.length === 0) { %>
+<p>Your cart is empty.</p>
+<% } else { %>
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% let total = 0; %> <% cart.forEach(item => { %>
+    <tr>
+      <td><%= item.name %></td>
+      <td>$<%= item.price.toFixed(2) %></td>
+      <td><%= item.quantity %></td>
+      <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+    </tr>
+    <% total += item.price * item.quantity; %> <% }); %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"><strong>Total:</strong></td>
+      <td><strong>$<%= total.toFixed(2) %></strong></td>
+    </tr>
+  </tfoot>
+</table>
+
+<button onclick="checkout()">Checkout</button>
+<% } %>
+
+<a href="/">Continue Shopping</a>
+
+<script>
+  function checkout() {
+    fetch("/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("POOM URL:", data.poomUrl);
+          console.log("cXML:", data.cxml);
+          // In a real application, you would submit the cXML to the POOM URL
+          alert("Checkout successful! Check console for POOM URL and cXML.");
+        } else {
+          alert("Checkout failed: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred during checkout.");
+      });
+  }
+</script>

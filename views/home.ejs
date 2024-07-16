@@ -1,0 +1,36 @@
+<h2>Welcome to our Product Catalog</h2>
+<div class="product-grid">
+  <% products.forEach(product => { %>
+  <div class="product-card">
+    <img src="/images/<%= product.image %>" alt="<%= product.name %>" />
+    <h3><%= product.name %></h3>
+    <p>$<%= product.price.toFixed(2) %></p>
+    <button onclick="addToCart(<%= product.id %>)">Add to Cart</button>
+  </div>
+  <% }) %>
+</div>
+
+<script>
+  function addToCart(productId) {
+    console.log("addtocart called", productId);
+    fetch("/addtocart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ productId: productId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Product added to cart!");
+        } else {
+          alert("Failed to add product to cart.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while adding the product to the cart.");
+      });
+  }
+</script>
