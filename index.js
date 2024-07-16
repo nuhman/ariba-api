@@ -45,6 +45,8 @@ let poomUrl = ""; // Store the POOM URL
 
 let buyerCookie = "";
 
+let supplierPartId = "SLB2024";
+
 // Home route
 app.get("/", (req, res) => {
   res.render("home", {
@@ -226,11 +228,11 @@ function generatePOOMcXML(cart) {
       (item) => `
     <ItemIn quantity="${item.quantity}">
       <ItemID>
-        <SupplierPartID>${item.id}</SupplierPartID>
+        <SupplierPartID>${supplierPartId}</SupplierPartID>
       </ItemID>
       <ItemDetail>
         <UnitPrice>
-          <Money currency="USD">${item.price.toFixed(2)}</Money>
+          <Money currency="KWD">${item.price.toFixed(2)}</Money>
         </UnitPrice>
         <Description xml:lang="en">${item.name}</Description>
         <UnitOfMeasure>EA</UnitOfMeasure>
@@ -267,7 +269,7 @@ function generatePOOMcXML(cart) {
       <BuyerCookie>${buyerCookie}</BuyerCookie>
       <PunchOutOrderMessageHeader operationAllowed="create">
         <Total>
-          <Money currency="USD">${cart
+          <Money currency="KWD">${cart
             .reduce((total, item) => total + item.price * item.quantity, 0)
             .toFixed(2)}</Money>
         </Total>
