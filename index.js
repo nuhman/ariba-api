@@ -41,10 +41,9 @@ const products = [
 // In-memory cart (in a real application, this would be stored in a database or session)
 let cart = [];
 
-let poomUrl =
-  "https://service.ariba.com/CatalogTester.aw/109534021/ad/handlePunchOutOrder/oj9ws0s1qJumOmbwGLxSfiSwnMbuWp7V0.2709534411566193532?awr=2&u=jLcQetdt&awps=TpA8NIyJlENm431S"; // Store the POOM URL
+let poomUrl = ""; // Store the POOM URL
 
-let buyerCookie = "oj9ws0s1qJumOmbwGLxSfiSwnMbuWp7V0.2709534411566193532";
+let buyerCookie = "";
 
 let supplierPartId = "SLB2024";
 
@@ -311,72 +310,6 @@ app.post("/generate-poom", (req, res) => {
 
   // Generate cXML for cart items
   const cxml = generatePOOMcXML(cart);
-
-  const dummyxml = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE cXML SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.014/cXML.dtd">
-<cXML payloadID="1234567890@example.com" timestamp="2024-07-16T12:00:00-07:00" version="1.2.014">
-  <Header>
-    <From>
-      <Credential domain="NetworkID">
-        <Identity>AN11032106721-T</Identity>
-      </Credential>
-    </From>
-    <To>
-      <Credential domain="NetworkID">
-        <Identity>AN01000002779-T</Identity>
-      </Credential>
-    </To>
-    <Sender>
-      <Credential domain="NetworkID">
-        <Identity>AN11032106721-T</Identity>
-        <SharedSecret>p9LJ<109c$</SharedSecret>
-      </Credential>
-      <UserAgent>Supplier PunchOut Site</UserAgent>
-    </Sender>
-  </Header>
-  <Message>
-    <PunchOutOrderMessage>
-      <BuyerCookie>M8pEb4E3HBn8cYM6W7sDy4TVQp3oznaS0.122519288906922132</BuyerCookie>
-      <PunchOutOrderMessageHeader operationAllowed="create">
-        <Total>
-          <Money currency="USD">239.98</Money>
-        </Total>
-      </PunchOutOrderMessageHeader>
-      <ItemIn quantity="2">
-        <ItemID>
-          <SupplierPartID>ABC123</SupplierPartID>
-          <SupplierPartAuxiliaryID>AUX-ABC123</SupplierPartAuxiliaryID>
-        </ItemID>
-        <ItemDetail>
-          <UnitPrice>
-            <Money currency="USD">59.99</Money>
-          </UnitPrice>
-          <Description xml:lang="en-US">High-Quality Office Chair</Description>
-          <UnitOfMeasure>EA</UnitOfMeasure>
-          <Classification domain="UNSPSC">56101500</Classification>
-          <ManufacturerPartID>MFG-ABC123</ManufacturerPartID>
-          <ManufacturerName>ErgoComfort Inc.</ManufacturerName>
-        </ItemDetail>
-      </ItemIn>
-      <ItemIn quantity="1">
-        <ItemID>
-          <SupplierPartID>XYZ789</SupplierPartID>
-          <SupplierPartAuxiliaryID>AUX-XYZ789</SupplierPartAuxiliaryID>
-        </ItemID>
-        <ItemDetail>
-          <UnitPrice>
-            <Money currency="USD">120.00</Money>
-          </UnitPrice>
-          <Description xml:lang="en-US">Ergonomic Standing Desk</Description>
-          <UnitOfMeasure>EA</UnitOfMeasure>
-          <Classification domain="UNSPSC">56101500</Classification>
-          <ManufacturerPartID>MFG-XYZ789</ManufacturerPartID>
-          <ManufacturerName>ErgoComfort Inc.</ManufacturerName>
-        </ItemDetail>
-      </ItemIn>
-    </PunchOutOrderMessage>
-  </Message>
-</cXML>`;
 
   // URL-encode the cXML
   let encodedCxml = encodeURIComponent(cxml);
