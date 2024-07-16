@@ -172,6 +172,9 @@ app.post("/checkout", async (req, res) => {
   const cxml = generatePOOMcXML(cart);
 
   try {
+
+    console.log("cxml....")
+    console.log(cxml);
     // Send the cXML to the POOM URL
     const response = await axios.post(poomUrl, cxml, {
       headers: {
@@ -179,7 +182,7 @@ app.post("/checkout", async (req, res) => {
       },
     });
 
-    console.log("response: ", response);
+    //console.log("response: ", response);
 
     // Check the response from the POOM URL
     if (response.status === 200) {
@@ -191,6 +194,7 @@ app.post("/checkout", async (req, res) => {
         .status(response.status)
         .json({ success: false, message: "Checkout failed" });
     }
+
   } catch (error) {
     console.error("Error during checkout:", error);
     res
